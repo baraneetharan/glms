@@ -37,7 +37,7 @@ public class BookCategoryControllerTest {
 
         expectedBookCategory = Arrays.asList(bookCategory1, bookCategory2);
         when(bookCategoryRepository.findAll()).thenReturn(expectedBookCategory);
-        ResponseEntity<> actualBookCategory = BookCategoryController.all();
+        ResponseEntity<List<BookCategory>> actualBookCategory = BookCategoryController.all();
         // assertNotNull(actualBookCategory);
         assertEquals(expectedBookCategory, actualBookCategory);
     }
