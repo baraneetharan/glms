@@ -11,27 +11,20 @@ env:
 git:
   depth: 500
 
-addons:
-  sonarcloud:
-    organization: baraneetharan-github
-    token:
-      secure: 5440b0e65f5d7649a722d23996224976f5b68c46
-
 before_install:
 - chmod +x mvnw
 
 script:
 - "./mvnw clean install -B"
-- "./mvnw clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar"
+
 cache:
   directories:
   - "$HOME/.m2/repository"
-  - "$HOME/.sonar/cache"
 
 after_success:
 - docker login -u baraneetharan -p Baranee@123
 - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
-- export IMAGE_NAME=baraneetharan/docketserver
+- export IMAGE_NAME=baraneetharan/glms
 - docker build -t $IMAGE_NAME:$COMMIT .
 - docker tag $IMAGE_NAME:$COMMIT $IMAGE_NAME:$TAG
 - docker push $IMAGE_NAME
@@ -39,4 +32,4 @@ after_success:
 deploy:
   provider: heroku
   api_key: e091f2d5-df18-489b-8da6-db8735cd8df8
-  app: docketserver
+  app: glms
