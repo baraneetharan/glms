@@ -3,15 +3,16 @@ package com.psg.glms.controller;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-
-import com.psg.glms.model.BookRequest;
-import com.psg.glms.repository.BookRequestRepository;
+import java.util.function.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,29 +26,45 @@ import java.util.stream.Stream.*;
 public class BookRequestController {
 
     @Autowired
-  private BookRequestRepository bookRequestRepository;
+    private BookRequestRepository bookRequestRepository;
 
-//   @GetMapping("/get")
-//   public @ResponseBody ResponseEntity<List<BookRequest>> all() {
-//     Stream<BookRequest> bookRequeststream = bookRequestRepository.findAllCustomers();
-    
-//     Map<BookRequest, Long> counted = bookRequeststream
-//             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    @RequestMapping("/userwise/{userId}")
+    public void userwise(@PathVariable Long userId) {
+        List<BookRequest> lstBookRequest = bookRequestRepository.findAll();
+        lstBookRequest.stream().filter(x -> userId == (x.getUserid())).forEach(System.out::println);
+        
+        long l = lstBookRequest.stream().filter(x -> userId == (x.getUserid())).distinct().count();
+        System.out.println("No. of distinct books:" + l);
+        List<String> categories = lstBookRequest.stream().filter(x -> userId == (x.getUserid()))
+                .filter(distinctByKey(BookRequest::getCategory)).map(x -> x.getCategory()).collect(Collectors.toList());
+        System.out.println("Distinct category:" + categories);
 
-//         System.out.println(counted);  
+        Map<String, Long> strmap = lstBookRequest.stream().filter(x -> userId == (x.getUserid()))
+                .collect(Collectors.groupingBy(BookRequest::getCategory, Collectors.counting()));
+        System.out.println("Category wise count:"+strmap);
 
-//       return new ResponseEntity<>(bookRequestRepository.findAll(), HttpStatus.OK);
-//   }
+        Map<Object, Object> collect = strmap.entrySet().stream().filter(map -> map.getValue() > 1)
+                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+        System.out.println("More than one book taken from Category:"+collect);       
 
-  @RequestMapping("/findall")
-  public String findAllByStream() {
-      List<String> mapstream = Collections.emptyList();
+    }
 
-      try (Stream<BookRequest> stream = bookRequestRepository.findAllCustomers()) {
-          mapstream = stream.map(customer -> customer.toString()).collect(Collectors.toList());
-      }
+    @RequestMapping("/findall")
+    public void findAllByStream() {
+        List<BookRequest> lstBookRequest = bookRequestRepository.findAll();
 
-      return mapstream.toString();
-  }
-    
+        Map<Long, Map<String, Set<String>>> result = lstBookRequest.stream()
+                // .filter(x -> 1 == (x.getUserid()))
+                .collect(Collectors.groupingBy(BookRequest::getUserid, Collectors.groupingBy(BookRequest::getCategory,
+                        Collectors.mapping(BookRequest::getBook, Collectors.toSet()))));
+
+        System.out.println(result);
+
+    }
+
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Set<Object> seen = ConcurrentHashMap.newKeySet();
+        return t -> seen.add(keyExtractor.apply(t));
+    }
+
 }
