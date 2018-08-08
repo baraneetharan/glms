@@ -95,6 +95,22 @@ More than one book taken from Category:{Cat1=2}
 } 
 
 
+1 Book1inCat1 Cat1 D 1 
+3 Book1inCat2 Cat2 D 1 
+5 Book1inCat3 Cat3 D 1 
+6 Book2inCat3 Cat3 D 1
+
+No. of books:4 
+Category wise count:{Cat3=2, Cat2=1, Cat1=1} 
+More than one book taken from Category:{Cat3=2} 
+Distinct Category:{Cat2=1, Cat1=1} 
+
+**POINT 
+the points for books is :4 
+the point for each catergory :3 
+catergory points for more than 2 books in single cat 3 the reviewpoint:10 
+the liked point :2 the points for liked book took by other users: 6
+
 
 
 # Angular
