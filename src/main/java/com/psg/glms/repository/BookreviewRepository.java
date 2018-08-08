@@ -1,4 +1,4 @@
-package com.kg.library.Repository;
+package com.psg.glms.repository;
 
 import java.util.List;
 
