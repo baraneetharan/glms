@@ -11,9 +11,9 @@ public class BookRequest{
     @Column
     private Long userid;
     @Column
-    private Long catId;
+    private String category;
     @Column
-    private Long bookId;
+    private String book;
 	@Column
     private String status;
 
@@ -30,28 +30,27 @@ public class BookRequest{
         this.bookreqid = bookreqid;
     }
     /**
-     * @return the catId
+     * @return the category
      */
-    public Long getCatId() {
-        return catId;
+    public String getCategory() {
+        return category;
     }
     /**
-     * @param catId the catId to set
+     * @param category the category to set
      */
-    public void setCatId(Long catId) {
-        this.catId = catId;
+    public void setCategory(String category) {
+        this.category = category;
+    }/**
+     * @return the book
+     */
+    public String getBook() {
+        return book;
     }
     /**
-     * @return the bookId
+     * @param book the book to set
      */
-    public Long getBookId() {
-        return bookId;
-    }
-    /**
-     * @param bookId the bookId to set
-     */
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
+    public void setBook(String book) {
+        this.book = book;
     }
     /**
      * @return the status

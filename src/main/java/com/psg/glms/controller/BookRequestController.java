@@ -14,12 +14,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.*;
+
+import com.psg.glms.Properties;
+import com.psg.glms.model.BookCategory;
+import com.psg.glms.model.BookRequest;
+import com.psg.glms.model.Bookreview;
+import com.psg.glms.model.Likereview;
+import com.psg.glms.repository.BookCategoryRepository;
+import com.psg.glms.repository.BookRequestRepository;
+import com.psg.glms.repository.BookreviewRepository;
+import com.psg.glms.repository.LikereviewRepository;
 
 @RestController
 @RequestMapping("api/Bookrequest")
@@ -39,7 +50,7 @@ public class BookRequestController {
         private Properties Libraryprop1;
 
         @RequestMapping(value = "/userwise/{userId}", method = RequestMethod.GET)
-        public void userwise(@PathVariable Long userId) {
+        public String userwise(@PathVariable Long userId) {
                 List<BookRequest> lstBookRequest2 = bookRequestRepository.findAll();
                 List<BookRequest> lstBookRequest1 = bookRequestRepository.findByUserid(userId);
                 List<Bookreview> reviewlist = bookreviewRepository.findAll();
@@ -54,6 +65,9 @@ public class BookRequestController {
                 Map<String, Long> strmap = lstBookRequest1.stream()
                                 .collect(Collectors.groupingBy(BookRequest::getCategory, Collectors.counting()));
                 System.out.println("Category wise count:" + strmap);
+
+                // Map<String, Long> strmap = lstBookRequest.stream().filter(x -> userId == (x.getUserid()))                 .collect(Collectors.groupingBy(BookRequest::getCategory, Collectors.counting()));         
+                // System.out.println("Category wise count:"+strmap);
 
                 Map<Object, Object> collect = strmap.entrySet().stream().filter(map -> map.getValue() > 1)
                                 .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
@@ -90,6 +104,20 @@ public class BookRequestController {
                 System.out.println("the points for liked book took by other users: "
                                 + likedbookstaken * Libraryprop1.getTakenlikedbooks());
 
+                                // String str="**********Book Request***********/nNo. of  books:" + books;
+                                String str="**********Book Request***********"+"\n"+"No. of  books:" + books+"\n"+
+                                "Category wise count:" + strmap+"\n"+
+                                "More than one book taken from Category:" + collect+"\n"+
+                                "Distinct Category:" + distinctcat+"\n"+
+                                "**********Review Points********"+"\n"+
+                                "the points for books is :" + books * Libraryprop1.getpointsperbook()+"\n"+
+                                "the point for each catergory :" + list1 * Libraryprop1.getpointspercategory()+"\n"+
+                                "catergory points for more than 2 books in single cat " + list * Libraryprop1.getmorethan5()+"\n"+
+                                "the reviewpoint:" + reviewpoint * Libraryprop1.getReviewpints()+"\n"+
+                                "the liked point :" + likepoint * Libraryprop1.getLikedpoints()+"\n"+
+                                "the points for liked book took by other users: " + likedbookstaken * Libraryprop1.getTakenlikedbooks();
+                                
+                                return str;
         }
 
         @RequestMapping(value = "/", method = RequestMethod.GET)

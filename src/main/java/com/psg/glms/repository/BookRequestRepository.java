@@ -1,5 +1,6 @@
 package com.psg.glms.repository;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import com.psg.glms.model.BookRequest;
@@ -10,6 +11,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BookRequestRepository extends JpaRepository<BookRequest, Long>{
-    @Query("select c from BookRequest c")
-	Stream<BookRequest> findAllCustomers();
+    public List<BookRequest> findByUserid(Long userid);
 }
