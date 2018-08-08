@@ -25,46 +25,91 @@ import java.util.stream.Stream.*;
 @RequestMapping("api/Bookrequest")
 public class BookRequestController {
 
-    @Autowired
-    private BookRequestRepository bookRequestRepository;
+            @Autowired
+        private BookCategoryRepository bookCategoryRepository;
+        @Autowired
+        private BookRequestRepository bookRequestRepository;
 
-    @RequestMapping("/userwise/{userId}")
-    public void userwise(@PathVariable Long userId) {
-        List<BookRequest> lstBookRequest = bookRequestRepository.findAll();
-        lstBookRequest.stream().filter(x -> userId == (x.getUserid())).forEach(System.out::println);
-        
-        long l = lstBookRequest.stream().filter(x -> userId == (x.getUserid())).distinct().count();
-        System.out.println("No. of distinct books:" + l);
-        List<String> categories = lstBookRequest.stream().filter(x -> userId == (x.getUserid()))
-                .filter(distinctByKey(BookRequest::getCategory)).map(x -> x.getCategory()).collect(Collectors.toList());
-        System.out.println("Distinct category:" + categories);
+        @Autowired
+        private BookreviewRepository bookreviewRepository;
+        @Autowired
+        private LikereviewRepository likereviewRepository;
 
-        Map<String, Long> strmap = lstBookRequest.stream().filter(x -> userId == (x.getUserid()))
-                .collect(Collectors.groupingBy(BookRequest::getCategory, Collectors.counting()));
-        System.out.println("Category wise count:"+strmap);
+        @Autowired
+        private Properties Libraryprop1;
 
-        Map<Object, Object> collect = strmap.entrySet().stream().filter(map -> map.getValue() > 1)
-                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
-        System.out.println("More than one book taken from Category:"+collect);       
+        @RequestMapping(value = "/userwise/{userId}", method = RequestMethod.GET)
+        public void userwise(@PathVariable Long userId) {
+                List<BookRequest> lstBookRequest2 = bookRequestRepository.findAll();
+                List<BookRequest> lstBookRequest1 = bookRequestRepository.findByUserid(userId);
+                List<Bookreview> reviewlist = bookreviewRepository.findAll();
+                List<Likereview> likelist = likereviewRepository.findAll();
 
-    }
+                lstBookRequest1.stream().forEach(System.out::println);
+                System.out.println("*********************");
 
-    @RequestMapping("/findall")
-    public void findAllByStream() {
-        List<BookRequest> lstBookRequest = bookRequestRepository.findAll();
+                long books = lstBookRequest1.stream().count();
+                System.out.println("No. of  books:" + books);
 
-        Map<Long, Map<String, Set<String>>> result = lstBookRequest.stream()
-                // .filter(x -> 1 == (x.getUserid()))
-                .collect(Collectors.groupingBy(BookRequest::getUserid, Collectors.groupingBy(BookRequest::getCategory,
-                        Collectors.mapping(BookRequest::getBook, Collectors.toSet()))));
+                Map<String, Long> strmap = lstBookRequest1.stream()
+                                .collect(Collectors.groupingBy(BookRequest::getCategory, Collectors.counting()));
+                System.out.println("Category wise count:" + strmap);
 
-        System.out.println(result);
+                Map<Object, Object> collect = strmap.entrySet().stream().filter(map -> map.getValue() > 1)
+                                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+                System.out.println("More than one book taken from Category:" + collect);
 
-    }
+                Map<String, Long> distinctcat = strmap.entrySet().stream().filter(map -> map.getValue() == 1)
+                                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+                System.out.println("Distinct Category:" + distinctcat);
 
-    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Set<Object> seen = ConcurrentHashMap.newKeySet();
-        return t -> seen.add(keyExtractor.apply(t));
-    }
+                System.out.println("**********POINT********");
+                Long list = strmap.entrySet().stream().filter(map -> map.getValue() >= 2).map(x -> x.getKey())
+                                .collect(Collectors.counting());
+                Long list1 = strmap.entrySet().stream().collect(Collectors.counting());
+
+                System.out.println("the points for books is :" + books * Libraryprop1.getpointsperbook());
+                System.out.println("the point for each catergory :" + list1 * Libraryprop1.getpointspercategory());
+                System.out.println("catergory points for more than 2 books in single cat "
+                                + list * Libraryprop1.getmorethan5());
+
+                List<Long> reviewbook = reviewlist.stream().filter(x -> x.getUserid() == userId)
+                                .map(x -> x.getBookrevid()).collect(Collectors.toList());
+
+                List<Long> likebook = likelist.stream().map(x -> x.getBookrewid()).filter(reviewbook::contains)
+                                .distinct().collect(Collectors.toList());
+
+                Long reviewpoint = reviewbook.stream().collect(Collectors.counting());
+                System.out.println("the reviewpoint:" + reviewpoint * Libraryprop1.getReviewpints());
+
+                Long likepoint = likebook.stream().collect(Collectors.counting());
+                System.out.println("the liked point :" + likepoint * Libraryprop1.getLikedpoints());
+
+                Long likedbookstaken = lstBookRequest2.stream().map(x -> x.getBookreqid()).filter(reviewbook::contains)
+                                .collect(Collectors.counting());
+                System.out.println("the points for liked book took by other users: "
+                                + likedbookstaken * Libraryprop1.getTakenlikedbooks());
+
+        }
+
+        @RequestMapping(value = "/", method = RequestMethod.GET)
+        List<BookCategory> bookcategory() {
+                return bookCategoryRepository.findAll();
+        }
+        @RequestMapping(value = "/bookRequest", method = RequestMethod.GET)
+  ResponseEntity<List<BookRequest>> bookRequest() {
+                return new ResponseEntity<List<BookRequest>> ( bookRequestRepository.findAll(), HttpStatus.OK);
+             
+        }
+
+        @RequestMapping(value = "/bookReview", method = RequestMethod.GET)
+        List<Bookreview> bookReview() {
+                return bookreviewRepository.findAll();
+        }
+
+        @RequestMapping(value = "/likeReview", method = RequestMethod.GET)
+        List<Likereview> likeReview() {
+                return likereviewRepository.findAll();
+        }
 
 }
