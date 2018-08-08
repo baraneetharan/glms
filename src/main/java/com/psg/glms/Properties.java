@@ -1,4 +1,4 @@
-package com.kg.library;
+package com.psg.glms;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
